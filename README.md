@@ -33,9 +33,9 @@ git commit -m "Short descriptive message"
 git push
 ```
 Best practices:
-	•	Use meaningful commit messages
-	•	Push frequently
-	•	Keep your branch up to date with main if needed
+ - Use meaningful commit messages
+ - Push frequently
+ - Keep your branch up to date with main if needed
 
 ### 3. Required Submission Structure
 
@@ -52,47 +52,42 @@ Your repository must contain the following before the deadline:
 
 #### Required README Sections
 
-Update this README with the following sections:
+Update this `README.md` with the following sections:
 
 Project Overview
-	•	What problem does this solve?
-	•	Why is it valuable?
-
-⸻
+ - What problem does this solve?
+ - Why is it valuable?
 
 Architecture
-	•	High-level system design
-	•	Key technologies used
-	•	Architecture diagram stored in /docs
-    •	How to run the project
+ - High-level system design
+ - Key technologies used
+ - Architecture diagram stored in /docs
+ - How to run the project
 
-⸻
 Known Limitations
-	•	What would you improve with more time?
-	•	What edge cases are not handled?
-
-⸻
+ - What would you improve with more time?
+ - What edge cases are not handled?
 
 ### 4. Submission Deadline
 
 All code must be pushed before:
 
-<INSERT DEADLINE DATE & TIME + TIMEZONE>
+`<INSERT DEADLINE DATE & TIME + TIMEZONE>`
 
 The latest commit timestamp on your team branch will be considered final.
 
 ### 5. Evaluation Criteria
 Projects will be evaluated on:
-	•	Innovation
-	•	Technical execution
-	•	Business impact
-	•	Clarity of presentation
-	•	Feasibility and scalability
-	•	Use of GitHub and clear commit history
+ - Innovation
+ - Technical execution
+ - Business impact
+ - Clarity of presentation
+ - Feasibility and scalability
+ - Use of GitHub and clear commit history
 
 ### 6. Code Ownership
 
 By participating, you acknowledge:
-	•	This repository is owned by Solar Landscape.
-	•	All submitted code remains in this repository after the event.
-	•	The organization may use, modify, or build upon submitted projects.
+ - This repository is owned by Solar Landscape.
+ - All submitted code remains in this repository after the event.
+ - The organization may use, modify, or build upon submitted projects.
