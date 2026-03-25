@@ -44,10 +44,10 @@ Your repository must contain the following before the deadline:
 /
 ├── README.md
 ├── src/ (or your main code folder)
-├── docs/
-│   ├── architecture-diagram.(png|jpg|pdf)
-│   └── screenshots/
-└── demo.md (optional but encouraged)
+└── docs/
+    ├── architecture-diagram.(png|jpg|pdf)
+    ├── demo.md (optional but encouraged)
+    └── screenshots/
 ```
 
 #### Required README Sections
