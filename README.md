@@ -22,7 +22,7 @@ Please read these instructions carefully before starting.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/<org-name>/<repo-name>.git
+git clone https://github.com/solarlandscape/<repo-name>.git
 cd <repo-name>
 ```
 
@@ -72,20 +72,11 @@ Known Limitations
 
 All code must be pushed before:
 
-`<INSERT DEADLINE DATE & TIME + TIMEZONE>`
+`Friday at 3:30PM EST`
 
 The latest commit timestamp on your team branch will be considered final.
 
-### 5. Evaluation Criteria
-Projects will be evaluated on:
- - Innovation
- - Technical execution
- - Business impact
- - Clarity of presentation
- - Feasibility and scalability
- - Use of GitHub and clear commit history
-
-### 6. Code Ownership
+### 5. Code Ownership
 
 By participating, you acknowledge:
  - This repository is owned by Solar Landscape.
