@@ -528,6 +528,7 @@ export default function App() {
             {result.solarFinancials || result.detailedFinancials ? (
               <FinancialComparison
                 solarFinancials={result.solarFinancials}
+                solarInvestment={result.solarInvestment}
                 dcScore={result.dcScore}
                 dcEconomics={result.dcEconomics}
                 detailedFinancials={result.detailedFinancials}

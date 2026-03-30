@@ -63,7 +63,19 @@ function CustomTooltip({ active, payload, label }) {
   );
 }
 
-export default function FinancialComparison({ solarFinancials, dcEconomics, detailedFinancials, dcLandscape, dcScore }) {
+function InfoTip({ text }) {
+  return (
+    <span
+      className="inline-flex items-center justify-center w-4 h-4 ml-1 rounded-full border border-slate-300 text-[10px] text-slate-500 align-middle cursor-help"
+      title={text}
+      aria-label={text}
+    >
+      ⓘ
+    </span>
+  );
+}
+
+export default function FinancialComparison({ solarFinancials, solarInvestment, dcEconomics, detailedFinancials, dcLandscape, dcScore }) {
   const [activeScenario, setActiveScenario] = useState('base');
 
   // Legacy mode: no detailedFinancials yet
@@ -79,6 +91,25 @@ export default function FinancialComparison({ solarFinancials, dcEconomics, deta
   }
 
   const { dc, solar, scenarios, summary } = detailedFinancials;
+  const ownerMonthlyLease = solarInvestment?.monthlyLeaseRevenue ?? solarFinancials?.monthlyLeaseRevenue ?? 0;
+  const ownerAnnualLease = solarInvestment?.annualLeaseRevenue ?? solarFinancials?.annualLeaseRevenue ?? ownerMonthlyLease * 12;
+  const ownerNpv20yr = solarInvestment?.ownerNPV20yr ?? solar.finalNPV;
+  const operatorIrr = solarInvestment?.irrPercent;
+  const operatorPayback = solarInvestment?.breakEvenYears;
+  const operatorInstallLow = solarInvestment?.installCostLow;
+  const operatorInstallHigh = solarInvestment?.installCostHigh;
+  const operatorNetAfterItc = solarInvestment?.netInstallCost;
+  const operatorAnnualEnergyValue = solarInvestment?.annualEnergyValue;
+  const operatorItcValue = solarInvestment?.itcValue;
+  const operatorProfit20 = solarInvestment?.totalProfit20yr;
+  const stateRate = solarInvestment?.rateCentsPerKwh;
+  const estDcCostLow = dcEconomics?.dcCapacityMW ? dcEconomics.dcCapacityMW * 5_000_000 : null;
+  const estDcCostHigh = dcEconomics?.dcCapacityMW ? dcEconomics.dcCapacityMW * 8_000_000 : null;
+  const dcPanelTheme = (dcScore || 0) <= 45
+    ? 'bg-emerald-50 border-emerald-200'
+    : (dcScore || 0) >= 65
+      ? 'bg-red-50 border-red-200'
+      : 'bg-slate-50 border-slate-200';
 
   const chartData = solar.cashFlows.map((sf, i) => {
     const dcBase = dc.cashFlows[i] || {};
@@ -194,54 +225,104 @@ export default function FinancialComparison({ solarFinancials, dcEconomics, deta
         )}
       </div>
 
-      {/* Side-by-side detail */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Solar */}
+      {/* Financial summary bar */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+        <h3 className="text-xs font-black tracking-widest text-slate-600 mb-2">FINANCIAL SUMMARY</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+          <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+            <div className="text-xs text-slate-600">Building Owner Earns</div>
+            <div className="font-semibold text-slate-900">{formatCurrency(ownerMonthlyLease)}/mo | {formatCurrency(ownerNpv20yr)} NPV</div>
+          </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+            <div className="text-xs text-slate-600">Solar Landscape ROI</div>
+            <div className="font-semibold text-slate-900">{operatorIrr == null ? '—' : `${operatorIrr}% IRR`} | {operatorPayback == null ? '—' : `${operatorPayback} yr payback`}</div>
+          </div>
+          <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+            <div className="text-xs text-slate-600">vs. Data Center</div>
+            <div className="font-semibold text-slate-900">{dcScore ?? '—'}/100 viable</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3-panel comparison */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Panel 1: Solar owner perspective */}
         <div className="bg-green-50 border border-green-200 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">☀️</span>
-            <h3 className="font-semibold text-green-800 text-sm">Solar System</h3>
+            <h3 className="font-semibold text-green-800 text-sm">Solar: Owner Perspective</h3>
             <span className="ml-auto text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full font-medium">
-              {formatCurrency(solar.netUpfrontInvestment)} Upfront
+              Income Stream
             </span>
           </div>
           <div className="space-y-1 divide-y divide-green-100">
-            <FinRow label="Capital Required" value={formatCurrency(solar.netUpfrontInvestment)} negative={solar.netUpfrontInvestment > 0} positive={solar.netUpfrontInvestment === 0} />
-            <FinRow label="Year 1 Savings" value={formatCurrency(solar.cashFlows[1]?.revenue)} positive />
-            <FinRow label="Annual O&M" value={formatCurrency(solar.annualMaintenanceCost)} negative />
-            <FinRow label={`Inverter (Y${solar.inverterReplacementYear || '—'})`} value={formatCurrency(solar.inverterReplacementCost)} negative />
-            <FinRow label="Year 10 Net" value={formatCurrency(solar.cashFlows[10]?.net)} />
-            <FinRow label="Year 20 Net" value={formatCurrency(solar.cashFlows[20]?.net)} />
-            <FinRow label="Break-Even" value={solar.breakEvenYear ? `Year ${solar.breakEvenYear}` : 'Never (20yr)'} positive={Boolean(solar.breakEvenYear)} />
-            <FinRow label="20-Year Cumulative" value={formatCurrency(solar.cashFlows[20]?.cumulative)} positive />
-            <FinRow label="20-Year NPV (5%)" value={formatCurrency(solar.finalNPV)} positive />
-            <FinRow label="Construction Risk" value="Low-Moderate" />
-            <FinRow label="Data Source" value={solarFinancials?.source || 'Estimated'} muted />
+            <FinRow label="Monthly Lease Payment" value={formatCurrency(ownerMonthlyLease)} positive />
+            <FinRow label="Annual Lease Revenue" value={formatCurrency(ownerAnnualLease)} />
+            <FinRow label="Time to First Payment" value="6–8 weeks" />
+            <FinRow label="Upfront Cost to Owner" value="$0" positive />
+            <FinRow label={<span>20-Year Lease NPV<InfoTip text="Net Present Value: total future lease payments in today's dollars, discounted at 5%/year" /></span>} value={formatCurrency(ownerNpv20yr)} positive />
+            <FinRow label="Lease Escalation" value="2% per year" />
+            <FinRow label="Construction Risk to Owner" value="None" positive />
           </div>
         </div>
 
-        {/* DC */}
-        <div className={`border rounded-2xl p-5 ${(dcScore || 0) > 65 ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'}`}>
+        {/* Panel 2: Solar Landscape perspective */}
+        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">📈</span>
+            <h3 className="font-semibold text-blue-800 text-sm">Solar: Solar Landscape Perspective</h3>
+            <span className="ml-auto text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full font-medium">
+              Investment Case
+            </span>
+          </div>
+          <div className="space-y-1 divide-y divide-blue-100">
+            <FinRow label="System Size" value={solarInvestment?.systemSizeKw ? `${solarInvestment.systemSizeKw} kW` : '—'} />
+            <FinRow label="Total Install Cost" value={operatorInstallLow && operatorInstallHigh ? `${formatCurrency(operatorInstallLow)} – ${formatCurrency(operatorInstallHigh)}` : '—'} />
+            <FinRow label={<span>Federal ITC (30%)<InfoTip text="Federal Investment Tax Credit: 30% of install cost deducted from taxes under the Inflation Reduction Act" /></span>} value={formatCurrency(operatorItcValue)} positive />
+            <FinRow label="Net Cost After ITC" value={formatCurrency(operatorNetAfterItc)} negative />
+            <FinRow label="Annual Energy Revenue" value={formatCurrency(operatorAnnualEnergyValue)} />
+            <FinRow label={<span>Solar Landscape Break-Even<InfoTip text="Years until Solar Landscape's cumulative energy revenue covers the net installation cost" /></span>} value={operatorPayback == null ? '—' : `${operatorPayback} years`} positive />
+            <FinRow label={<span>Project IRR (25yr)<InfoTip text="Internal Rate of Return: Solar Landscape's annualized investment return over 25 years" /></span>} value={operatorIrr == null ? '—' : `${operatorIrr}%`} positive />
+            <FinRow label="20-Year Net Profit" value={formatCurrency(operatorProfit20)} positive={operatorProfit20 > 0} negative={operatorProfit20 < 0} />
+            <FinRow label="Annual O&M Cost" value="~1% of install" />
+            <FinRow label={<span>Panel Degradation<InfoTip text="Solar panels lose ~0.5% efficiency per year — factored into all 25-year projections" /></span>} value="0.5%/year" />
+          </div>
+        </div>
+
+        {/* Panel 3: Data center */}
+        <div className={`border rounded-2xl p-5 ${dcPanelTheme}`}>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">🏢</span>
-            <h3 className={`font-semibold text-sm ${(dcScore || 0) > 65 ? 'text-amber-900' : 'text-slate-900'}`}>Edge Data Center</h3>
+            <h3 className="font-semibold text-sm text-slate-900">Data Center</h3>
             <span className="ml-auto text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-medium">
               {formatCurrency(dc.totalCapexAdjusted)} CapEx
             </span>
           </div>
           <div className="space-y-1 divide-y divide-slate-100">
             <FinRow label="Capital Required" value={formatCurrency(dc.totalCapexAdjusted)} negative />
+            <FinRow label="Est. Construction Cost" value={estDcCostLow && estDcCostHigh ? `${formatCurrency(estDcCostLow)} – ${formatCurrency(estDcCostHigh)}` : '—'} />
+            <FinRow label="Time to Revenue" value="18–36 months" />
             <FinRow label="Colo Rate" value={`$${dc.adjustedColoRate ?? dcEconomics?.coloRatePerKwMonth ?? '—'}/kW/mo`} />
             <FinRow label="Year 1 Revenue" value={formatCurrency(dc.cashFlows[1]?.revenue)} />
             <FinRow label="Year 3 Revenue" value={formatCurrency(dc.cashFlows[3]?.revenue)} />
             <FinRow label="Annual Opex" value={formatCurrency(dc.adjustedAnnualOpex)} negative />
-            <FinRow label="Break-Even Year" value={dc.breakEvenYear ? `Year ${dc.breakEvenYear}` : 'Never (20yr)'} />
+            <FinRow label={<span>Break-Even<InfoTip text="Years until Solar Landscape's cumulative energy revenue covers the net installation cost" /></span>} value={dc.breakEvenYear ? `Year ${dc.breakEvenYear}` : 'Never (20yr)'} />
+            <FinRow label="Project Success Rate" value={(dcScore || 0) >= 65 ? 'High' : (dcScore || 0) >= 45 ? 'Moderate' : 'Low'} />
+            <FinRow label="Upfront Owner Investment" value="Significant" negative />
+            <FinRow label="DC Feasibility Score" value={`${dcScore ?? '—'}/100`} />
             <FinRow label="20-Year Cumulative" value={formatCurrency(dc.cashFlows[20]?.cumulative)} />
             <FinRow label="20-Year NPV (8%)" value={formatCurrency(dc.finalNPV)} />
             <FinRow label="Saturation NPV" value={formatCurrency(satNPV)} negative />
             <FinRow label="DC Capacity" value={`${dcEconomics?.dcCapacityMW ?? '—'} MW`} muted />
           </div>
         </div>
+      </div>
+
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-600 leading-relaxed">
+        <span className="font-semibold text-slate-700">Assumptions:</span> Commercial rooftop install cost $1.80–$2.20/W (Wood Mackenzie 2024).
+        Federal ITC 30% per Inflation Reduction Act. Lease escalation 2%/yr. Panel degradation 0.5%/yr. Discount rate 5%.
+        State electricity rate: {stateRate ? `${stateRate}¢/kWh` : 'N/A'} (EIA). DC construction cost $5–8M/MW (Cushman & Wakefield).
+        Solar projections from Google Solar API. Data center financials are estimates; actual returns vary by operator and market conditions.
       </div>
 
       {/* Competitive landscape callout */}

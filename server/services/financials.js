@@ -123,6 +123,13 @@ function calcYearByYearFinancials({ dcEconomics, solarFinancials, dcLandscape, r
   const solarNPVFinal = Math.round(solarNPVAccum);
   const dcNPVFinal = Math.round(dcNPVAccum);
   const satNPVFinal = Math.round(satNPVAccum);
+  const solarTotalNetCashIn = solarCashFlows
+    .slice(1)
+    .reduce((acc, y) => acc + (y.net || 0), 0);
+  const solarTotalSavings = solarTotalNetCashIn - netUpfrontInvestment;
+  const solarROI = netUpfrontInvestment > 0
+    ? (solarTotalSavings / netUpfrontInvestment) * 100
+    : null;
 
   return {
     dc: {
@@ -143,6 +150,8 @@ function calcYearByYearFinancials({ dcEconomics, solarFinancials, dcLandscape, r
       annualMaintenanceCost,
       inverterReplacementYear,
       inverterReplacementCost,
+      totalSavings20Year: Math.round(solarTotalSavings),
+      roiPct20Year: solarROI == null ? null : +solarROI.toFixed(1),
     },
     scenarios: {
       dcMarketSaturation: {

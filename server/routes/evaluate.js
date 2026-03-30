@@ -20,6 +20,7 @@ const { getNASACloudAndWind } = require('../services/nasaPower');
 const { getBuildingPermits } = require('../services/permits');
 const { classifyPermitsForRoofAge, getRoofConditionFromSolarApi, calcRoofAgeScore } = require('../services/roofAge');
 const { getFourYearRoofImageryComparison } = require('../services/roofImageryHistory');
+const { calcSolarInvestmentAnalysis } = require('../services/solarFinancials');
 const { calcDCEconomics } = require('../services/dcEconomics');
 const { analyzeDCCompetitiveLandscape } = require('../services/dcProximity');
 const { getWaterStress, getPowerGridCapacity, getCoolingFeasibility, calcResourceFeasibilityScore } = require('../services/resourceFeasibility');
@@ -115,6 +116,7 @@ router.post('/evaluate', async (req, res) => {
     const roofAgeClassification = classifyPermitsForRoofAge(permitData);
     const solarApiCondition = getRoofConditionFromSolarApi(solarApi);
     const roofAgeScore = calcRoofAgeScore(roofAgeClassification, solarApiCondition, multiYearImagery);
+    const solarInvestment = calcSolarInvestmentAnalysis(solarApi, state);
 
     // DC Economics — uses scores already computed synchronously
     const dcEconomics = calcDCEconomics({
@@ -175,6 +177,7 @@ router.post('/evaluate', async (req, res) => {
       insights: scores.insights,
       topSolarReasons: scores.topSolarReasons,
       solarFinancials: scores.solarFinancials,
+      solarInvestment,
       roofReport,
       solarMetrics: {
         annualKWh: solarApi?.annualKwh || nrel.annualAC,

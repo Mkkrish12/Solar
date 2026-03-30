@@ -24,26 +24,36 @@ export default function LoadingProgress() {
 
   useEffect(() => {
     let stepIndex = 0;
+    let timer = null;
+    let cancelled = false;
 
     const advance = () => {
-      if (stepIndex < STEPS.length) {
+      if (!cancelled && stepIndex < STEPS.length) {
         const step = STEPS[stepIndex];
         setCurrentStep(stepIndex);
 
-        const timer = setTimeout(() => {
-          setCompletedSteps(prev => [...prev, stepIndex]);
+        timer = setTimeout(() => {
+          if (cancelled) return;
+          // Prevent duplicate increments (React strict-mode effect replay in dev).
+          setCompletedSteps(prev => (prev.includes(stepIndex) ? prev : [...prev, stepIndex]));
           stepIndex++;
           advance();
         }, step.duration);
-
-        return () => clearTimeout(timer);
       }
     };
 
     advance();
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
-  const progressPct = Math.round((completedSteps.length / STEPS.length) * 100);
+  const progressPct = Math.min(
+    100,
+    Math.round((Math.min(completedSteps.length, STEPS.length) / STEPS.length) * 100),
+  );
 
   return (
     <div className="w-full max-w-2xl mx-auto animate-fade-in">

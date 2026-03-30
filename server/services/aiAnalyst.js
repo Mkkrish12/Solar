@@ -65,7 +65,7 @@ async function generateRoofReport(evaluationResult) {
 
   const detailedFinancialsBlock = detailedFinancials
     ? `DETAILED 20-YEAR FINANCIAL COMPARISON:
-- Solar 20-yr NPV (5% discount): $${(detailedFinancials.solar.finalNPV / 1e6).toFixed(1)}M | Capital required: $0 | Cash flow starts: Month 1
+- Solar 20-yr NPV (5% discount): $${(detailedFinancials.solar.finalNPV / 1e6).toFixed(1)}M | Net upfront investment: $${((detailedFinancials.solar.netUpfrontInvestment || 0) / 1e6).toFixed(2)}M | Break-even: ${detailedFinancials.solar.breakEvenYear ? 'Year ' + detailedFinancials.solar.breakEvenYear : 'Never within 20 years'}
 - DC 20-yr NPV (8% discount, base): $${(detailedFinancials.dc.finalNPV / 1e6).toFixed(1)}M | Capital required: $${(detailedFinancials.dc.totalCapexAdjusted / 1e6).toFixed(1)}M | Break-even: ${detailedFinancials.dc.breakEvenYear ? 'Year ' + detailedFinancials.dc.breakEvenYear : 'Never within 20 years'}
 - DC NPV under market saturation scenario: $${((detailedFinancials.dc.finalNPV + detailedFinancials.scenarios.dcMarketSaturation.npvImpact) / 1e6).toFixed(1)}M | Saturation break-even: ${detailedFinancials.scenarios.dcMarketSaturation.breakEvenYear ? 'Year ' + detailedFinancials.scenarios.dcMarketSaturation.breakEvenYear : 'Never'}
 - Solar NPV advantage vs DC base: $${(detailedFinancials.summary.solarAdvantageNPV / 1e6).toFixed(1)}M`
@@ -98,7 +98,7 @@ SECTION 1 — "THE VERDICT" (2-3 sentences): State clearly which option wins at 
 
 SECTION 2 — "THE DATA CENTER REALITY CHECK" (4-5 sentences): Use the competitive landscape data, resource feasibility constraints, and financial break-even year to explain exactly why the DC path is risky at this specific location. If nearby DCs are compressing rates, name that number. If water or grid constraints exist, state them. If break-even is beyond 10 years or never, call it out. If market saturation makes the case even weaker, note the saturation NPV impact.
 
-SECTION 3 — "THE SOLAR OPPORTUNITY" (3-4 sentences): Lead with the NPV advantage figure. Mention that solar requires $0 capital and generates cash from Month 1, while the DC path requires $${detailedFinancials ? (detailedFinancials.dc.totalCapexAdjusted / 1e6).toFixed(1) + 'M' : 'millions'} upfront. Reference the monthly lease amount, 20-year NPV, and carbon impact.
+SECTION 3 — "THE SOLAR OPPORTUNITY" (3-4 sentences): Lead with the NPV advantage figure. Mention solar net upfront investment and break-even year from the financial model, then compare with the DC capital required ($${detailedFinancials ? (detailedFinancials.dc.totalCapexAdjusted / 1e6).toFixed(1) + 'M' : 'millions'}) and DC break-even profile. Reference annual savings/cash flow and carbon impact.
 
 Tone: Professional, confident, direct. Written for a business-minded commercial building owner. No hedging, no bullet points, pure prose paragraphs. Begin each section with its header in ALL CAPS.`;
 

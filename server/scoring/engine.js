@@ -566,7 +566,7 @@ function computeScores(data) {
     dcEconomics: dcEconomics || null,
     dcLandscape: dcLandscape || null,
     resourceFeasibility: resourceFeasibility || null,
-    solarFinancials: buildSolarFinancials(solarApi, nrel, nasaPower),
+    solarFinancials: buildSolarFinancials(solarApi, nrel, nasaPower, powerCostData),
   };
 }
 
@@ -756,9 +756,10 @@ function getTopSolarReasons(criteria, hardDisqualifiers, nrel, floodZone, drough
  * NREL model: assume a typical commercial building with 700m² usable roof
  * (~7,500 sqft), 350 panels, system scaled from NREL 100kW reference output.
  */
-function buildSolarFinancials(solarApi, nrel, nasaPower) {
+function buildSolarFinancials(solarApi, nrel, nasaPower, powerCostData) {
   const windAdder = nasaPower?.windInstallCostAdder ?? 0.05;
   const windMaintMult = nasaPower?.windMaintenanceMultiplier ?? 1.05;
+  const siteRatePerKwh = Math.max(0.06, ((powerCostData?.centsPerKwh ?? 12) / 100));
 
   if (solarApi) {
     // Apply wind NPV adjustment: higher wind = higher maintenance = lower NPV
@@ -775,6 +776,7 @@ function buildSolarFinancials(solarApi, nrel, nasaPower) {
       leaseRatePerSqFt: solarApi.leaseRatePerSqFt,
       installCostAdderPct: windAdder,
       maintenanceMultiplier: windMaintMult,
+      siteElectricityRatePerKwh: +siteRatePerKwh.toFixed(3),
       source: 'Google Solar API',
       isEstimate: false,
     };
@@ -797,6 +799,7 @@ function buildSolarFinancials(solarApi, nrel, nasaPower) {
     twentyYearNPV: windAdjustedNPV,
     installCostAdderPct: windAdder,
     maintenanceMultiplier: windMaintMult,
+    siteElectricityRatePerKwh: +siteRatePerKwh.toFixed(3),
     source: 'NREL PVWatts (estimated)',
     isEstimate: true,
   };
